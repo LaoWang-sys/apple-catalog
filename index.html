@@ -4,10 +4,23 @@
 .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:10px 0}label{font-size:13px;display:flex;flex-direction:column}
 input,select,button{padding:5px;font-size:14px}table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{border-bottom:1px solid #ddd;padding:5px 8px;text-align:left}th{background:#f5f5f7;cursor:pointer}td.p{text-align:right;white-space:nowrap}
-.meta{color:#555;font-size:13px}details{margin:12px 0;background:#fafafa;padding:8px;border-radius:6px}</style></head><body>
+.meta{color:#555;font-size:13px}details{margin:12px 0;background:#fafafa;padding:8px;border-radius:6px}
+.hist{border:1px solid #e5e5ea;border-radius:8px;padding:12px;margin:12px 0;background:#fff}
+.hist h2{font-size:16px;margin:0 0 8px}.badge{display:inline-block;background:#e8f0fe;color:#174ea6;padding:2px 8px;border-radius:10px;font-size:12px;margin-right:6px}
+.note{font-size:12px;color:#666;margin-top:6px}</style></head><body>
 <h1>Apple 美国官网商品目录</h1>
 <div class="meta" id="meta">加载中…</div>
-<details id="chg"><summary>自上次运行以来的变化</summary><div id="chgbody"></div></details>
+<div class="hist">
+  <h2>历史抓取记录</h2>
+  <div class="bar">
+    <label>选择抓取时间<select id="histSel"><option value="latest">最新（当前目录）</option></select></label>
+    <button id="histLoad" type="button">加载该次数据</button>
+    <button id="histLatest" type="button">回到最新</button>
+  </div>
+  <div id="histSummary" class="meta">正在加载历史索引…</div>
+  <div class="note">每次抓取都会保存独立快照，不会覆盖旧记录。选择某次运行可查看当时商品列表，以及相对「上一次」的新增 / 下架 / 价格变动。</div>
+</div>
+<details id="chg" open><summary>相对上一轮的变化</summary><div id="chgbody"></div></details>
 <div class="bar">
 <label>最低价 ($)<input id="min" type="number" step="0.01"></label>
 <label>最高价 ($)<input id="max" type="number" step="0.01"></label>
@@ -19,27 +32,84 @@ th,td{border-bottom:1px solid #ddd;padding:5px 8px;text-align:left}th{background
 <div id="count"></div>
 <table><thead><tr><th>名称</th><th>部件号</th><th>价格 (USD)</th><th>类别</th><th>最后发现</th></tr></thead><tbody id="tb"></tbody></table>
 <script>
-let D,rows=[];const $=id=>document.getElementById(id);
+let D,rows=[],HIST={snapshots:[]},viewing='latest';
+const $=id=>document.getElementById(id);
 const fmtT=s=>s?new Date(s).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false})+'（北京时间）':'—';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-(window.__DATA__?Promise.resolve(window.__DATA__):fetch('data/products.json',{cache:'no-store'}).then(r=>r.json())).then(d=>{D=d;const m=d.meta;
-$('meta').innerHTML=`最后更新：${fmtT(m.generated_at)} ｜ 商品总数：${m.total} ｜ 含部件号：${m.with_part_number}`;
-[...new Set(d.items.map(i=>i.category))].sort().forEach(c=>$('cat').add(new Option(c,c)));
-const c=d.changes||{};const li=(a,f)=>a&&a.length?'<ul>'+a.slice(0,200).map(f).join('')+'</ul>':'<p>无</p>';
-const lk=i=>`<a href="${esc(i.url)}" target="_blank">${esc(i.name)}</a> ${esc(i.part_number)}`;
-$('chgbody').innerHTML=!c.compared_to?'<p>首次运行，暂无可比较的历史数据。</p>':
-`<p>对比：${esc(c.compared_to)}</p><h4>价格变动（${c.price_changed.length}）</h4>${li(c.price_changed,i=>`<li>${lk(i)}：$${i.old_price} → $${i.price}</li>`)}
-<h4>新增（${c.new.length}）</h4>${li(c.new,i=>`<li>${lk(i)} $${i.price}</li>`)}<h4>下架（${c.removed.length}）</h4>${li(c.removed,i=>`<li>${lk(i)} $${i.price}</li>`)}`;
-render()}).catch(e=>$('meta').textContent='加载 data/products.json 失败：'+e);
+const li=(a,f)=>a&&a.length?'<ul>'+a.slice(0,200).map(f).join('')+(a.length>200?`<li>…另有 ${a.length-200} 条</li>`:'')+'</ul>':'<p>无</p>';
+const lk=i=>`<a href="${esc(i.url)}" target="_blank">${esc(i.name)}</a> ${esc(i.part_number||'')}`;
+
+function fillCats(items){
+  const sel=$('cat'); const keep=sel.value; sel.innerHTML='<option value="">全部类别</option>';
+  [...new Set(items.map(i=>i.category))].sort().forEach(c=>sel.add(new Option(c,c)));
+  if([...sel.options].some(o=>o.value===keep)) sel.value=keep;
+}
+function showChanges(c){
+  if(!c||!c.compared_to)$('chgbody').innerHTML='<p>首次运行，或所选快照没有上一轮可对比。</p>';
+  else $('chgbody').innerHTML=`<p>对比上一轮：<code>${esc(c.compared_to)}</code></p>
+    <span class="badge">价格变动 ${c.price_changed.length}</span>
+    <span class="badge">新增 ${c.new.length}</span>
+    <span class="badge">下架 ${c.removed.length}</span>
+    <h4>价格变动（${c.price_changed.length}）</h4>${li(c.price_changed,i=>`<li>${lk(i)}：$${i.old_price} → $${i.price}</li>`)}
+    <h4>新增（${c.new.length}）</h4>${li(c.new,i=>`<li>${lk(i)} $${i.price}</li>`)}
+    <h4>下架（${c.removed.length}）</h4>${li(c.removed,i=>`<li>${lk(i)} $${i.price}</li>`)}`;
+}
+function applyData(d,label){
+  D=d;const m=d.meta||{};
+  $('meta').innerHTML=`正在查看：${esc(label)} ｜ 抓取时间：${fmtT(m.generated_at)} ｜ 商品总数：${m.total??(d.items||[]).length} ｜ 含部件号：${m.with_part_number??'—'}`;
+  fillCats(d.items||[]); showChanges(d.changes||{}); render();
+}
 function render(){if(!D)return;const mn=parseFloat($('min').value),mx=parseFloat($('max').value),q=$('q').value.trim().toLowerCase(),ct=$('cat').value,[k,dir]=$('sort').value.split('-');
-rows=D.items.filter(i=>(isNaN(mn)||i.price>=mn)&&(isNaN(mx)||i.price<=mx)&&(!ct||i.category===ct)&&(!q||(i.name+' '+i.part_number).toLowerCase().includes(q)));
+rows=(D.items||[]).filter(i=>(isNaN(mn)||i.price>=mn)&&(isNaN(mx)||i.price<=mx)&&(!ct||i.category===ct)&&(!q||(i.name+' '+(i.part_number||'')).toLowerCase().includes(q)));
 rows.sort((a,b)=>(k==='price'?a.price-b.price:a.name.localeCompare(b.name))*(dir==='asc'?1:-1));
 $('count').textContent=`共 ${rows.length} 件商品`;
-$('tb').innerHTML=rows.map(i=>`<tr><td><a href="${esc(i.url)}" target="_blank">${esc(i.name)}</a></td><td>${esc(i.part_number)||'—'}</td><td class="p">$${i.price.toFixed(2)}</td><td>${esc(i.category)}</td><td>${fmtT(i.last_seen)}</td></tr>`).join('')}
+$('tb').innerHTML=rows.map(i=>`<tr><td><a href="${esc(i.url)}" target="_blank">${esc(i.name)}</a></td><td>${esc(i.part_number)||'—'}</td><td class="p">$${Number(i.price).toFixed(2)}</td><td>${esc(i.category)}</td><td>${fmtT(i.last_seen)}</td></tr>`).join('')}
+
+function renderHistSummary(){
+  const snaps=HIST.snapshots||[];
+  if(!snaps.length){$('histSummary').textContent='暂无历史快照。';return;}
+  const cur=$('histSel').value;
+  const s=cur==='latest'?snaps[snaps.length-1]:snaps.find(x=>x.id===cur);
+  if(!s){$('histSummary').textContent='';return;}
+  $('histSummary').innerHTML=`共 <b>${snaps.length}</b> 次抓取记录。当前选中：<code>${esc(s.id)}</code> ｜ 商品 ${s.total}
+    ｜ 相对上一轮：新增 ${s.new??0} / 下架 ${s.removed??0} / 价格变动 ${s.price_changed??0}
+    ${s.compared_to?`（对比 ${esc(s.compared_to)}）`:''}`;
+}
+function fillHistSelect(){
+  const sel=$('histSel'); sel.innerHTML='<option value="latest">最新（当前目录）</option>';
+  [...(HIST.snapshots||[])].slice().reverse().forEach(s=>{
+    const label=`${fmtT(s.generated_at)} — ${s.total} 件（+${s.new??0}/-${s.removed??0}/Δ${s.price_changed??0}）`;
+    sel.add(new Option(label,s.id));
+  });
+}
+
+async function loadLatest(){
+  const d=window.__DATA__?window.__DATA__:await fetch('data/products.json',{cache:'no-store'}).then(r=>r.json());
+  viewing='latest'; $('histSel').value='latest';
+  applyData(d,'最新目录'); renderHistSummary();
+}
+async function loadSnapshot(id){
+  const s=(HIST.snapshots||[]).find(x=>x.id===id);
+  if(!s){alert('找不到该快照');return;}
+  $('histSummary').textContent='正在加载快照…';
+  const d=await fetch('data/'+s.path,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();});
+  viewing=id; applyData(d,'历史快照 '+s.id); renderHistSummary();
+}
+
 ['min','max','q','cat','sort'].forEach(id=>$(id).addEventListener('input',render));
 $('preset').onclick=()=>{$('min').value=390;$('max').value=399;render()};
 $('reset').onclick=()=>{['min','max','q'].forEach(i=>$(i).value='');$('cat').value='';render()};
 $('csv').onclick=()=>{const h=['名称','部件号','价格','类别','链接','最后发现'];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
 const t='\ufeff'+[h,...rows.map(i=>[i.name,i.part_number,i.price,i.category,i.url,i.last_seen])].map(r=>r.map(q).join(',')).join('\n');
 const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download='apple-products-filtered.csv';a.click()};
+$('histSel').onchange=renderHistSummary;
+$('histLoad').onclick=()=>{const v=$('histSel').value; if(v==='latest')loadLatest(); else loadSnapshot(v);};
+$('histLatest').onclick=()=>loadLatest();
+
+Promise.all([
+  window.__DATA__?Promise.resolve(window.__DATA__):fetch('data/products.json',{cache:'no-store'}).then(r=>r.json()),
+  fetch('data/history/index.json',{cache:'no-store'}).then(r=>r.ok?r.json():{snapshots:[]}).catch(()=>({snapshots:[]}))
+]).then(([d,idx])=>{
+  HIST=idx||{snapshots:[]}; fillHistSelect(); applyData(d,'最新目录'); renderHistSummary();
+}).catch(e=>$('meta').textContent='加载失败：'+e);
 </script></body></html>
