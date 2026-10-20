@@ -26,8 +26,8 @@ th,td{border-bottom:1px solid #ddd;padding:5px 8px;text-align:left}th{background
 <label>最高价 ($)<input id="max" type="number" step="0.01"></label>
 <label>搜索（名称/部件号）<input id="q" placeholder="例如 Watch 或 MXP63AM/A"></label>
 <label>类别<select id="cat"><option value="">全部类别</option></select></label>
-<label>排序<select id="sort"><option value="price-asc">价格 低→高</option><option value="price-desc">价格 高→低</option><option value="name-asc">名称 A→Z</option><option value="name-desc">名称 Z→A</option></select></label>
-<button id="preset">390–399 美元</button><button id="reset">重置</button><button id="csv">导出 CSV（筛选结果）</button>
+<label>排序<select id="sort"><option value="price-desc" selected>价格 高→低</option><option value="price-asc">价格 低→高</option><option value="name-asc">名称 A→Z</option><option value="name-desc">名称 Z→A</option></select></label>
+<button id="reset">重置</button><button id="csv">导出 CSV（筛选结果）</button>
 </div>
 <div id="count"></div>
 <table><thead><tr><th>名称</th><th>部件号</th><th>价格 (USD)</th><th>类别</th><th>最后发现</th></tr></thead><tbody id="tb"></tbody></table>
@@ -97,7 +97,6 @@ async function loadSnapshot(id){
 }
 
 ['min','max','q','cat','sort'].forEach(id=>$(id).addEventListener('input',render));
-$('preset').onclick=()=>{$('min').value=390;$('max').value=399;render()};
 $('reset').onclick=()=>{['min','max','q'].forEach(i=>$(i).value='');$('cat').value='';render()};
 $('csv').onclick=()=>{const h=['名称','部件号','价格','类别','链接','最后发现'];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
 const t='\ufeff'+[h,...rows.map(i=>[i.name,i.part_number,i.price,i.category,i.url,i.last_seen])].map(r=>r.map(q).join(',')).join('\n');
