@@ -1,1 +1,246 @@
-<h1>Apple 美国官网商品目录</h1>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Apple 美国官网商品目录</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{
+  --bg:#f5f5f7; --card:#fff; --text:#1d1d1f; --muted:#6e6e73;
+  --line:#d2d2d7; --accent:#0071e3; --accent-hover:#0077ed;
+  --radius:12px; --shadow:0 1px 3px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; color:var(--text); background:var(--bg);
+  font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  line-height:1.45; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:none;width:100%;margin:0;padding:16px 20px 40px}
+.topbar{
+  position:sticky; top:0; z-index:20;
+  background:rgba(245,245,247,.86); backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--line); margin:0 -20px 16px; padding:12px 20px;
+}
+.meta{color:var(--muted);font-size:13px}
+.grid{display:grid;gap:14px}
+@media(min-width:900px){
+  .grid-main{grid-template-columns:minmax(0,300px) minmax(0,1fr);align-items:start}
+}
+.card{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius); box-shadow:var(--shadow); padding:16px;
+}
+.card h2{font-size:15px;margin:0 0 12px;font-weight:600}
+.note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px;flex:1 1 140px}
+label.grow{flex:2 1 220px}
+input,select,button{
+  padding:8px 10px;font-size:14px;border:1px solid var(--line);
+  border-radius:8px;background:#fff;color:var(--text);font:inherit
+}
+input:focus,select:focus{outline:2px solid rgba(0,113,227,.35);border-color:var(--accent)}
+button{
+  cursor:pointer;background:#f5f5f7;white-space:nowrap;flex:0 0 auto;
+  align-self:end;padding:8px 14px
+}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.primary:hover{background:var(--accent-hover)}
+button.ghost{background:transparent}
+.badge{
+  display:inline-block;background:#e8f0fe;color:#174ea6;
+  padding:2px 8px;border-radius:999px;font-size:12px;margin:2px 4px 2px 0
+}
+.badge.yes{background:#e6f4ea;color:#137333}
+.badge.no{background:#fce8e6;color:#c5221f}
+.badge.unk{background:#f1f3f4;color:#5f6368}
+details.chg{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px}
+details.chg summary{cursor:pointer;font-weight:600;font-size:14px}
+#count{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;color:var(--muted);margin:4px 0 8px
+}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:960px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #eee}
+th{
+  position:sticky;top:0;background:#fafafa;font-size:12px;color:var(--muted);
+  font-weight:600;text-transform:none;z-index:1
+}
+tr:hover td{background:#f9f9fb}
+td.p{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+td.ship{white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+td a{color:var(--accent);text-decoration:none}
+td a:hover{text-decoration:underline}
+.side .bar{flex-direction:column;align-items:stretch}
+.side label{flex:none}
+.side button{width:100%;margin-top:2px}
+#histSummary{font-size:12.5px;line-height:1.6;margin-top:8px}
+code{font-size:12px;background:#f0f0f2;padding:1px 5px;border-radius:4px}
+@media(max-width:899px){
+  .topbar{position:static;margin:0 0 12px;border-radius:var(--radius);border:1px solid var(--line)}
+}
+
+.grid-main{overflow:hidden}
+.grid-main > *,
+.side, .side .card, .side .bar, .side label { min-width: 0; max-width: 100%; }
+.side select, .side input, .side button { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
+.side select{ text-overflow: ellipsis; }
+.table-wrap{ max-height: calc(100vh - 160px); }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><div class="meta" id="meta">加载中…</div></div>
+
+  <div class="grid grid-main">
+    <aside class="side grid">
+      <div class="card">
+        <h2>筛选</h2>
+        <div class="bar">
+          <label>最低价 ($)<input id="min" type="number" step="0.01"></label>
+          <label>最高价 ($)<input id="max" type="number" step="0.01"></label>
+          <label class="grow">搜索（名称/部件号）<input id="q" placeholder="例如 Watch 或 MXP63AM/A"></label>
+          <label>类别<select id="cat"><option value="">全部类别</option></select></label>
+          <label>快递筛选<select id="deliv">
+            <option value="">全部</option>
+            <option value="yes">仅可快递</option>
+            <option value="no">不可快递</option>
+            <option value="unknown">未知</option>
+          </select></label>
+          <label>排序<select id="sort">
+            <option value="price-desc" selected>价格 高→低</option>
+            <option value="price-asc">价格 低→高</option>
+            <option value="name-asc">名称 A→Z</option>
+            <option value="name-desc">名称 Z→A</option>
+          </select></label>
+          <button id="reset" type="button">重置</button>
+          <button id="csv" class="primary" type="button">导出 CSV</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>历史抓取记录</h2>
+        <div class="bar">
+          <label>选择抓取时间<select id="histSel"><option value="latest">最新（当前目录）</option></select></label>
+          <button id="histLoad" class="primary" type="button">加载该次数据</button>
+          <button id="histLatest" class="ghost" type="button">回到最新</button>
+        </div>
+        <div id="histSummary" class="meta">正在加载历史索引…</div>
+        <div class="note">每次抓取都会保存独立快照，不会覆盖旧记录。发货信息来自 Apple <code>/shop/sba/availability-message</code>（邮编见上方 meta）。</div>
+      </div>
+    </aside>
+
+    <main class="grid">
+      <details id="chg" class="chg"><summary>相对上一轮的变化</summary><div id="chgbody"></div></details>
+      <div>
+        <div id="count"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>名称</th><th>部件号</th><th>价格 (USD)</th><th>发货时间</th><th>是否可快递</th><th>加急</th><th>自提</th><th>类别</th><th>最后发现</th></tr></thead>
+            <tbody id="tb"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+
+let D,rows=[],HIST={snapshots:[]},viewing='latest';
+const $=id=>document.getElementById(id);
+const fmtT=s=>s?new Date(s).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false})+'（北京时间）':'—';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const li=(a,f)=>a&&a.length?'<ul>'+a.slice(0,200).map(f).join('')+(a.length>200?`<li>…另有 ${a.length-200} 条</li>`:'')+'</ul>':'<p>无</p>';
+const lk=i=>`<a href="${esc(i.url)}" target="_blank">${esc(i.name)}</a> ${esc(i.part_number||'')}`;
+const yn=v=>{const x=(v||'unknown');const lab=x==='yes'?'是':x==='no'?'否':'未知';const cls=x==='yes'?'yes':x==='no'?'no':'unk';return `<span class="badge ${cls}">${lab}</span>`;};
+
+function fillCats(items){
+  const sel=$('cat'); const keep=sel.value; sel.innerHTML='<option value="">全部类别</option>';
+  [...new Set(items.map(i=>i.category))].sort().forEach(c=>sel.add(new Option(c,c)));
+  if([...sel.options].some(o=>o.value===keep)) sel.value=keep;
+}
+function showChanges(c){
+  if(!c||!c.compared_to)$('chgbody').innerHTML='<p>首次运行，或所选快照没有上一轮可对比。</p>';
+  else $('chgbody').innerHTML=`<p>对比上一轮：<code>${esc(c.compared_to)}</code></p>
+    <span class="badge">价格变动 ${c.price_changed.length}</span>
+    <span class="badge">新增 ${c.new.length}</span>
+    <span class="badge">下架 ${c.removed.length}</span>
+    <h4>价格变动（${c.price_changed.length}）</h4>${li(c.price_changed,i=>`<li>${lk(i)}：$${i.old_price} → $${i.price}</li>`)}
+    <h4>新增（${c.new.length}）</h4>${li(c.new,i=>`<li>${lk(i)} $${i.price}</li>`)}
+    <h4>下架（${c.removed.length}）</h4>${li(c.removed,i=>`<li>${lk(i)} $${i.price}</li>`)}`;
+}
+function applyData(d,label){
+  D=d;const m=d.meta||{};
+  const fc=m.fulfillment_coverage||{};
+  const zipNote=m.fulfillment_resolved_zip?`实际邮编 ${m.fulfillment_resolved_zip}`:(m.fulfillment_requested_zip?`请求邮编 ${m.fulfillment_requested_zip}`:'');
+  $('meta').innerHTML=`正在查看：${esc(label)} ｜ 抓取时间：${fmtT(m.generated_at)} ｜ 商品总数：${m.total??(d.items||[]).length} ｜ 含部件号：${m.with_part_number??'—'}
+    ${fc.ship_estimate!=null?`｜ 有发货时间：${fc.ship_estimate}`:''}
+    ${fc.delivery_yes!=null?`｜ 可快递：${fc.delivery_yes}`:''}
+    ${zipNote?`｜ ${zipNote}`:''}`;
+  fillCats(d.items||[]); showChanges(d.changes||{}); render();
+}
+function render(){if(!D)return;const mn=parseFloat($('min').value),mx=parseFloat($('max').value),q=$('q').value.trim().toLowerCase(),ct=$('cat').value,dv=$('deliv').value,[k,dir]=$('sort').value.split('-');
+rows=(D.items||[]).filter(i=>(isNaN(mn)||i.price>=mn)&&(isNaN(mx)||i.price<=mx)&&(!ct||i.category===ct)&&(!dv||(i.delivery_available||'unknown')===dv)&&(!q||(i.name+' '+(i.part_number||'')).toLowerCase().includes(q)));
+rows.sort((a,b)=>(k==='price'?a.price-b.price:a.name.localeCompare(b.name))*(dir==='asc'?1:-1));
+$('count').textContent=`共 ${rows.length} 件商品`;
+$('tb').innerHTML=rows.map(i=>`<tr>
+  <td><a href="${esc(i.url)}" target="_blank">${esc(i.name)}</a></td>
+  <td>${esc(i.part_number)||'—'}</td>
+  <td class="p">$${Number(i.price).toFixed(2)}</td>
+  <td class="ship" title="${esc(i.ship_estimate||'')}">${esc(i.ship_estimate)||'—'}</td>
+  <td>${yn(i.delivery_available)}</td>
+  <td>${yn(i.express_available)}</td>
+  <td title="${esc(i.pickup_quote||'')}">${yn(i.pickup_available)}</td>
+  <td>${esc(i.category)}</td>
+  <td>${fmtT(i.last_seen)}</td></tr>`).join('')}
+
+function renderHistSummary(){
+  const snaps=HIST.snapshots||[];
+  if(!snaps.length){$('histSummary').textContent='暂无历史快照。';return;}
+  const cur=$('histSel').value;
+  const s=cur==='latest'?snaps[snaps.length-1]:snaps.find(x=>x.id===cur);
+  if(!s){$('histSummary').textContent='';return;}
+  $('histSummary').innerHTML=`共 <b>${snaps.length}</b> 次抓取记录。当前选中：<code>${esc(s.id)}</code> ｜ 商品 ${s.total}
+    ｜ 相对上一轮：新增 ${s.new??0} / 下架 ${s.removed??0} / 价格变动 ${s.price_changed??0}
+    ${s.compared_to?`（对比 ${esc(s.compared_to)}）`:''}`;
+}
+function fillHistSelect(){
+  const sel=$('histSel'); sel.innerHTML='<option value="latest">最新（当前目录）</option>';
+  [...(HIST.snapshots||[])].slice().reverse().forEach(s=>{
+    const label=`${fmtT(s.generated_at)} — ${s.total} 件（+${s.new??0}/-${s.removed??0}/Δ${s.price_changed??0}）`;
+    sel.add(new Option(label,s.id));
+  });
+}
+
+async function loadLatest(){
+  const d=window.__DATA__?window.__DATA__:await fetch('data/products.json',{cache:'no-store'}).then(r=>r.json());
+  viewing='latest'; $('histSel').value='latest';
+  applyData(d,'最新目录'); renderHistSummary();
+}
+async function loadSnapshot(id){
+  const s=(HIST.snapshots||[]).find(x=>x.id===id);
+  if(!s){alert('找不到该快照');return;}
+  $('histSummary').textContent='正在加载快照…';
+  const d=await fetch('data/'+s.path,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();});
+  viewing=id; applyData(d,'历史快照 '+s.id); renderHistSummary();
+}
+
+['min','max','q','cat','deliv','sort'].forEach(id=>$(id).addEventListener('input',render));
+$('reset').onclick=()=>{['min','max','q'].forEach(i=>$(i).value='');$('cat').value='';$('deliv').value='';render()};
+$('csv').onclick=()=>{const h=['名称','部件号','价格','发货时间','是否可快递','加急','自提','类别','链接','最后发现'];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+const t='\ufeff'+[h,...rows.map(i=>[i.name,i.part_number,i.price,i.ship_estimate,i.delivery_available,i.express_available,i.pickup_available,i.category,i.url,i.last_seen])].map(r=>r.map(q).join(',')).join('\n');
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download='apple-products-filtered.csv';a.click()};
+$('histSel').onchange=renderHistSummary;
+$('histLoad').onclick=()=>{const v=$('histSel').value; if(v==='latest')loadLatest(); else loadSnapshot(v);};
+$('histLatest').onclick=()=>loadLatest();
+
+Promise.all([
+  window.__DATA__?Promise.resolve(window.__DATA__):fetch('data/products.json',{cache:'no-store'}).then(r=>r.json()),
+  fetch('data/history/index.json',{cache:'no-store'}).then(r=>r.ok?r.json():{snapshots:[]}).catch(()=>({snapshots:[]}))
+]).then(([d,idx])=>{
+  HIST=idx||{snapshots:[]}; fillHistSelect(); applyData(d,'最新目录'); renderHistSummary();
+}).catch(e=>$('meta').textContent='加载失败：'+e);
+</script></body></html>
