@@ -230,6 +230,17 @@
    "new": 25,
    "removed": 36,
    "price_changed": 0
+  },
+  {
+   "id": "2026-10-29T19-58-10+0800",
+   "generated_at": "2026-10-29T19:58:10+08:00",
+   "total": 2623,
+   "with_part_number": 2575,
+   "path": "history/2026-10-29T19-58-10+0800.json",
+   "compared_to": "2026-10-29T07-57-01+0800",
+   "new": 5,
+   "removed": 15,
+   "price_changed": 0
   }
  ]
 }
