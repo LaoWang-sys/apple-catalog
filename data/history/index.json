@@ -241,6 +241,28 @@
    "new": 5,
    "removed": 15,
    "price_changed": 0
+  },
+  {
+   "id": "2026-10-30T08-00-01+0800",
+   "generated_at": "2026-10-30T08:00:01+08:00",
+   "total": 2639,
+   "with_part_number": 2591,
+   "path": "history/2026-10-30T08-00-01+0800.json",
+   "compared_to": "2026-10-29T19-58-10+0800",
+   "new": 34,
+   "removed": 18,
+   "price_changed": 0
+  },
+  {
+   "id": "2026-10-30T20-04-22+0800",
+   "generated_at": "2026-10-30T20:04:22+08:00",
+   "total": 2660,
+   "with_part_number": 2612,
+   "path": "history/2026-10-30T20-04-22+0800.json",
+   "compared_to": "2026-10-30T08-00-01+0800",
+   "new": 36,
+   "removed": 15,
+   "price_changed": 0
   }
  ]
 }
