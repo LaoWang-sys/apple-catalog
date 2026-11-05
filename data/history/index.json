@@ -384,6 +384,17 @@
    "new": 33,
    "removed": 19,
    "price_changed": 0
+  },
+  {
+   "id": "2026-11-05T20-00-08+0800",
+   "generated_at": "2026-11-05T20:00:08+08:00",
+   "total": 2639,
+   "with_part_number": 2591,
+   "path": "history/2026-11-05T20-00-08+0800.json",
+   "compared_to": "2026-11-05T07-59-24+0800",
+   "new": 32,
+   "removed": 11,
+   "price_changed": 0
   }
  ]
 }
