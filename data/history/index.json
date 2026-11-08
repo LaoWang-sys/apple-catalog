@@ -450,6 +450,17 @@
    "new": 0,
    "removed": 14,
    "price_changed": 0
+  },
+  {
+   "id": "2026-11-08T20-04-54+0800",
+   "generated_at": "2026-11-08T20:04:54+08:00",
+   "total": 2588,
+   "with_part_number": 2540,
+   "path": "history/2026-11-08T20-04-54+0800.json",
+   "compared_to": "2026-11-08T07-56-21+0800",
+   "new": 3,
+   "removed": 8,
+   "price_changed": 0
   }
  ]
 }
