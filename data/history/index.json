@@ -604,6 +604,28 @@
    "new": 3,
    "removed": 86,
    "price_changed": 0
+  },
+  {
+   "id": "2026-11-16T20-11-08+0800",
+   "generated_at": "2026-11-16T20:11:08+08:00",
+   "total": 2621,
+   "with_part_number": 2573,
+   "path": "history/2026-11-16T20-11-08+0800.json",
+   "compared_to": "2026-11-16T08-03-39+0800",
+   "new": 62,
+   "removed": 9,
+   "price_changed": 0
+  },
+  {
+   "id": "2026-11-17T08-09-06+0800",
+   "generated_at": "2026-11-17T08:09:06+08:00",
+   "total": 2613,
+   "with_part_number": 2565,
+   "path": "history/2026-11-17T08-09-06+0800.json",
+   "compared_to": "2026-11-16T20-11-08+0800",
+   "new": 11,
+   "removed": 19,
+   "price_changed": 0
   }
  ]
 }
